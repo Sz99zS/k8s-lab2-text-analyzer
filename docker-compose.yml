@@ -1,0 +1,27 @@
+services:
+  api:
+    build: ./api
+    image: text-analyzer-api:1.0
+    volumes:
+      - logs:/var/log/app
+
+  frontend:
+    build: ./frontend
+    image: text-analyzer-frontend:1.0
+    environment:
+      - API_HOST=api
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+  log-agent:
+    image: busybox:1.36
+    command: ["sh", "-c", "touch /var/log/app/app.log; tail -F /var/log/app/app.log"]
+    volumes:
+      - logs:/var/log/app
+    depends_on:
+      - api
+
+volumes:
+  logs:

@@ -1,0 +1,14 @@
+server {
+    listen 80;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+    }
+
+    # Запити до API передаються в контейнер api.
+    # API_HOST = "api" у docker-compose, "localhost" у Kubernetes (контейнери одного Pod мають спільну мережу).
+    location /api/ {
+        proxy_pass http://${API_HOST}:5000;
+    }
+}

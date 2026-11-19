@@ -1,0 +1,47 @@
+# Один Pod, в якому працюють три контейнери додатку AI Text Analyzer.
+# Контейнери спілкуються через localhost (спільна мережа Pod'а)
+# та обмінюються логами через volume типу emptyDir.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: text-analyzer
+  labels:
+    app: text-analyzer
+spec:
+  volumes:
+    - name: logs
+      emptyDir: {}
+  containers:
+    - name: frontend
+      image: text-analyzer-frontend:1.0
+      imagePullPolicy: Never
+      env:
+        - name: API_HOST
+          value: "localhost"
+      ports:
+        - containerPort: 80
+      resources:
+        requests: { cpu: "50m", memory: "32Mi" }
+        limits: { cpu: "200m", memory: "64Mi" }
+
+    - name: api
+      image: text-analyzer-api:1.0
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 5000
+      volumeMounts:
+        - name: logs
+          mountPath: /var/log/app
+      resources:
+        requests: { cpu: "100m", memory: "64Mi" }
+        limits: { cpu: "300m", memory: "128Mi" }
+
+    - name: log-agent
+      image: busybox:1.36
+      command: ["sh", "-c", "touch /var/log/app/app.log; tail -F /var/log/app/app.log"]
+      volumeMounts:
+        - name: logs
+          mountPath: /var/log/app
+      resources:
+        requests: { cpu: "10m", memory: "8Mi" }
+        limits: { cpu: "50m", memory: "16Mi" }

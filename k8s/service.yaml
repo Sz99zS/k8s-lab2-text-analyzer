@@ -1,0 +1,13 @@
+# Service типу NodePort, щоб відкрити веб-інтерфейс Pod'а в браузері.
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-analyzer
+spec:
+  type: NodePort
+  selector:
+    app: text-analyzer
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080

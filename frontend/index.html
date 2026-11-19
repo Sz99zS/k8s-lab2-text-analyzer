@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Text Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; background: #f4f6fa; }
+    h1 { color: #2b4c7e; }
+    textarea { width: 100%; height: 140px; font-size: 15px; padding: 8px; box-sizing: border-box; }
+    button { margin-top: 10px; padding: 10px 24px; font-size: 15px; background: #2b4c7e; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+    #result { margin-top: 20px; background: #fff; padding: 16px; border-radius: 6px; }
+    .positive { color: green; } .negative { color: red; } .neutral { color: gray; }
+  </style>
+</head>
+<body>
+  <h1>AI Text Analyzer</h1>
+  <p>Введіть текст (укр / eng / рус) — сервіс порахує статистику та визначить тональність.</p>
+  <textarea id="text">Мені дуже подобається ця лабораторна робота, Kubernetes це класно!</textarea>
+  <button onclick="send()">Аналізувати</button>
+  <div id="result">Результат з'явиться тут.</div>
+  <script>
+    async function send() {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: document.getElementById('text').value })
+      });
+      const d = await res.json();
+      const box = document.getElementById('result');
+      if (!res.ok) { box.textContent = 'Помилка: ' + d.error; return; }
+      box.innerHTML =
+        '<b>Тональність:</b> <span class="' + d.sentiment + '">' + d.sentiment + '</span><br>' +
+        '<b>Символів:</b> ' + d.characters + ' &nbsp; <b>Слів:</b> ' + d.words +
+        ' &nbsp; <b>Речень:</b> ' + d.sentences + '<br>' +
+        '<b>Позитивних слів:</b> ' + d.positive_words + ' &nbsp; <b>Негативних слів:</b> ' + d.negative_words + '<br>' +
+        '<b>Топ слова:</b> ' + d.top_words.map(w => w.word + ' (' + w.count + ')').join(', ');
+    }
+  </script>
+</body>
+</html>
